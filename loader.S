@@ -134,26 +134,25 @@ p_mode_start:
 
     call read_disk
 
-; perform check for kernel
-    lea ecx, [20*512]       ; counter, block size = 512
-    mov eax, 0x0            ; checksum
-    mov bx, KERNEL_BASE_ADDR
+;calculate md5
+    push dword [KERNEL_CHECKSUM_BASE_ADDR]
+    push KERNEL_BASE_ADDR
+    push kernel_checksum
+    call _rwf_md5
 
-get_kernel_checksum:
-    movzx edx, byte [bx]    ; Add every byte to checksum
-    add eax, edx
-    inc bx                  ; Find the previous byte
-    dec ecx
-    jnz get_kernel_checksum
+    mov edi, KERNEL_CHECKSUM_BASE_ADDR+4
+    mov esi, kernel_checksum
+    mov ecx, 16
 
 check_kernel_checksum:
-    cmp eax, dword [KERNEL_CHECKSUM_BASE_ADDR]
+    lodsb
+    cmp al, byte [edi]
     jne kernel_checksum_error
-
-kernel_checksum_correct:
-    mov esi, kernel_good_msg
-    call print_string
-    jmp orig_code
+    inc edi
+    dec ecx
+    test ecx, ecx
+    jz orig_code
+    jmp check_kernel_checksum
 
 kernel_checksum_error:
     mov esi, kernel_bad_msg
@@ -352,5 +351,6 @@ kernel_good_msg:
 kernel_bad_msg:
     db 'Your kernel is bad!', 0x00
 
-kernel_checksum:
-    dd 39363
+kernel_checksum times 16 db 0
+
+%include "rewolf_md5.inc"
