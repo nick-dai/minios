@@ -127,6 +127,13 @@ p_mode_start:
 
     call read_disk
 
+;--------載入 hash--------
+    mov ax, KERNEL_CHECKSUM_START_SECTOR
+    mov bx, KERNEL_CHECKSUM_BASE_ADDR
+    mov cx, 1
+
+    call read_disk
+
 ; perform check for kernel
     lea ecx, [20*512]       ; counter, block size = 512
     mov eax, 0x0            ; checksum
@@ -140,7 +147,7 @@ get_kernel_checksum:
     jnz get_kernel_checksum
 
 check_kernel_checksum:
-    cmp eax, dword [kernel_checksum]
+    cmp eax, dword [KERNEL_CHECKSUM_BASE_ADDR]
     jne kernel_checksum_error
 
 kernel_checksum_correct:
