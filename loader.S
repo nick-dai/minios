@@ -9,7 +9,10 @@ GDT_LIMIT   equ  GDT_SIZE-1
 ;--------記憶體大小記錄在 0x510--------
 total_mem_bytes equ 0x510
 
-section loader vstart=LOADER_BASE_ADDR
+[BITS 16]
+; section loader vstart=LOADER_BASE_ADDR
+; wtf here's an error here.
+_start:
 ;--------列印字串--------
     mov sp, LOADER_BASE_ADDR
     mov bp, loadermsg
@@ -52,8 +55,8 @@ section loader vstart=LOADER_BASE_ADDR
 e820_failed_try_e801:
     mov ax, 0xe801
     int 0x15
-    jc  e801_failed_go_88        
-;below 15MB        
+    jc  e801_failed_go_88
+;below 15MB
     mov cx, 0x400
     mul cx
     shl edx, 16
@@ -108,6 +111,7 @@ mem_get_ok:
 
 [BITS 32]
 ;以32位元指令的格式組譯指令
+extern pow
 
 p_mode_start:
 ;初始化段暫存器
@@ -133,6 +137,13 @@ p_mode_start:
     mov cx, 1
 
     call read_disk
+
+; Testing for calling C func
+; push 3
+; push 2
+; call pow
+; l:
+;     jmp l
 
 ;calculate md5
     push dword [KERNEL_CHECKSUM_BASE_ADDR]
@@ -194,11 +205,11 @@ orig_code:
 ;==2==
     mov eax, PAGE_DIR_TABLE_POS
     mov cr3, eax
-;==3==    
+;==3==
     mov eax, cr0
     or eax, 0x80000000
     mov cr0, eax
-;重新讀取分頁下的 gdt    
+;重新讀取分頁下的 gdt
     lgdt [gdt_ptr]
 ;show a V
     mov byte[gs:160], 'V'
@@ -288,10 +299,10 @@ create_pde:
     sub eax, 0x1000
     mov [PAGE_DIR_TABLE_POS + 4092], eax
 
-;每個 PTE 表 4k 實體對應，1M／4k＝256  
+;每個 PTE 表 4k 實體對應，1M／4k＝256
     mov ecx, 256
-    mov esi, 0 
-    mov edx, PG_US_U | PG_RW_W | PG_P 
+    mov esi, 0
+    mov edx, PG_US_U | PG_RW_W | PG_P
 create_pte:
     mov [ebx+esi*4], edx
     add edx, 4096
@@ -313,7 +324,7 @@ create_kernel_pde:
 
 ;--------GDT--------
 ;第0個不可用
-GDT_BASE:   
+GDT_BASE:
     dd 0x00000000
     dd 0x00000000
 
@@ -323,18 +334,18 @@ GDT_DESC:
     dd DESC_CODE_HIGH4
 
 ;平坦模型下的 ds，ss
-DATA_STACK_DESC:    
+DATA_STACK_DESC:
     dd  0x0000ffff
     dd  DESC_DATA_HIGH4
 
 ;文字模式顯卡的記憶體位置 0xb8000~0xbffff ,((0xbffff-0xb8000)+1)/4-1 = 7
-VIDEO_DESC:    
+VIDEO_DESC:
     dd  0x80000007
     dd  DESC_VIDEO_HIGH4
 
 GDT_END:
 
-gdt_ptr:     
+gdt_ptr:
     dw  GDT_LIMIT
     dd  GDT_BASE
 
@@ -342,7 +353,7 @@ gdt_ptr:
 ards_buf times 200 db 0
 ards_nr dw 0
 
-loadermsg: 
+loadermsg:
     db '2 loader in real.'
 
 kernel_good_msg:

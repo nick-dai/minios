@@ -1,19 +1,42 @@
 BUILD_DIR=./build
-LIB=-I include/ 
-CFLAGS=-fno-builtin -fno-stack-protector -O2 
-all:img
-img:asm
+LIB=-I include/
+CFLAGS=-fno-builtin -fno-stack-protector -O2
+
+.PHONY: clean dump
+all:img dump
+
+img: $(BUILD_DIR)/mbr.bin $(BUILD_DIR)/loader.bin $(BUILD_DIR)/kernel.bin
 	dd if=$(BUILD_DIR)/mbr.bin of=hd60M.img count=1 bs=512 conv=notrunc
-	dd if=$(BUILD_DIR)/loader.bin of=hd60M.img bs=512 count=8 seek=1 conv=notrunc 
-	dd if=$(BUILD_DIR)/kernel.bin of=hd60M.img bs=512 count=200 seek=10 conv=notrunc	
-	dd if=$(BUILD_DIR)/kernel_hash.bin of=hd60M.img bs=512 count=1 seek=210 conv=notrunc 
-asm:
+	dd if=$(BUILD_DIR)/loader.bin of=hd60M.img bs=512 count=8 seek=1 conv=notrunc
+	dd if=$(BUILD_DIR)/kernel.bin of=hd60M.img bs=512 count=200 seek=10 conv=notrunc
+	dd if=$(BUILD_DIR)/kernel_hash.bin of=hd60M.img bs=512 count=1 seek=210 conv=notrunc
+
+# Build mbr
+$(BUILD_DIR)/mbr.bin: mbr.S
+	@echo "\033[0;33mBuilding MBR...\033[0m"
 	nasm -I include/ -o $(BUILD_DIR)/mbr.bin mbr.S
-	nasm -I include/ -o $(BUILD_DIR)/loader.bin loader.S
+
+# Build loader
+$(BUILD_DIR)/loader.bin: loader.S
+	@echo "\033[0;33mBuilding loader...\033[0m"
+	nasm -I include/ -f elf32 -o $(BUILD_DIR)/loader.elf loader.S
+
+	gcc $(CFLAGS) -c -o $(BUILD_DIR)/pow.o pow.c
+
+	ld -Ttext 0x600 $(BUILD_DIR)/loader.elf -o $(BUILD_DIR)/loader.o $(BUILD_DIR)/pow.o
+	objcopy -O binary $(BUILD_DIR)/loader.o $(BUILD_DIR)/loader.bin
+
+# Build kernel
+$(BUILD_DIR)/kernel.bin: kernel/main.c lib/print.S
+	@echo "\033[0;33mBuilding kernel...\033[0m"
 	nasm -I include/ -f elf32 -o $(BUILD_DIR)/print.o lib/print.S
 	gcc  -I lib/ -m32 -c -o $(BUILD_DIR)/main.o kernel/main.c
 	ld -m elf_i386  $(BUILD_DIR)/main.o $(BUILD_DIR)/print.o -Ttext 0xc0001000 -o $(BUILD_DIR)/main.bin
 	objcopy -O binary $(BUILD_DIR)/main.bin $(BUILD_DIR)/kernel.bin
 	python3 hash_bin.py
+
+dump:
+	objdump -D -b binary -m i8086 -M intel $(BUILD_DIR)/loader.bin > $(BUILD_DIR)/loader.bin.dump
+
 clean:
 	rm $(BUILD_DIR)/*.*
