@@ -157,20 +157,21 @@ p_mode_start:
     mov esi, kernel_checksum               ; current kernel hash
     mov ecx, 16
 
-check_kernel_checksum:
-    lodsb
-    cmp al, byte [edi]
-    jne kernel_checksum_error
-    inc edi
-    dec ecx
-    test ecx, ecx
-    jz orig_code
-    jmp check_kernel_checksum
+; check whether the md5 
+    check_kernel_checksum:
+        lodsb
+        cmp al, byte [edi]
+        jne kernel_checksum_error
+        inc edi
+        dec ecx
+        test ecx, ecx
+        jz orig_code
+        jmp check_kernel_checksum
 
-kernel_checksum_error:
-    mov esi, kernel_bad_msg
-    call print_string
-    jmp error_hlt
+    kernel_checksum_error:
+        mov esi, kernel_bad_msg
+        call print_string
+        jmp error_hlt
 
 ; print a string
 ; put the addr of string in esi
