@@ -36,7 +36,9 @@ $(BUILD_DIR)/kernel.bin: kernel/main.c lib/print.S
 	python3 hash_bin.py
 
 dump:
-	objdump -D -b binary -m i8086 -M intel $(BUILD_DIR)/loader.bin > $(BUILD_DIR)/loader.bin.dump
+	objdump -D -b binary -m i386 -M intel $(BUILD_DIR)/loader.bin > $(BUILD_DIR)/loader.bin.dump
+	objdump -D -b binary -m i386 -M intel $(BUILD_DIR)/kernel.bin > $(BUILD_DIR)/kernel.bin.dump
+	objdump -D -b binary -m i386 -M intel $(BUILD_DIR)/rsa.o > $(BUILD_DIR)/rsa.o.dump
 
 clean:
 	rm $(BUILD_DIR)/*.*

@@ -138,17 +138,23 @@ p_mode_start:
     call read_disk
 
 ; Testing for calling C func
-; extern rsaDecrypt
-; lea eax, [testForRSA]
+    extern rsaDecrypt
 
-; push 1
-; push eax
-; call rsaDecrypt
-; add esp, 8
+    ; lea eax, [testForRSA]
+    ; mov edi, eax
 
-; mov eax, 4294967293
+    ; push 0xfffffffd
+    ; push 0x13b0aca5
+    ; push 1
+    ; push eax
+    ; call rsaDecrypt
+    ; add esp, 16
 
-; hlt
+    ; hlt
+
+    ; 0x88 f9 e0 19
+    ; testForRSA db 0x19, 0xe0, 0xf9, 0x88
+    ; aa db 0x12, 0x34, 0x56, 0x78
 
 ;calculate md5
     push dword [KERNEL_CHECKSUM_BASE_ADDR]
@@ -368,8 +374,5 @@ kernel_bad_msg:
     db 'Your kernel is bad!', 0x00
 
 kernel_checksum times 16 db 0
-
-testForRSA:
-    dd 0x78, 0x56, 0x34, 0x12
 
 %include "rewolf_md5.inc"

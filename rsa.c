@@ -2,6 +2,7 @@ typedef unsigned int size_t;
 typedef int int32_t;
 typedef unsigned int uint32_t;
 
+// TODO: This will overflow
 uint32_t powMod(uint32_t b, uint32_t e, uint32_t m)
 {
     uint32_t acc = 1;
@@ -15,12 +16,12 @@ uint32_t powMod(uint32_t b, uint32_t e, uint32_t m)
 }
 
 // small key for testing
-static const uint32_t n = 899;
-static const uint32_t d = 613; // decrypt key
-// enc key e = 37
+// int n = 899;
+// int e = 37;
+// int d = 613;
 
 // 32-bit RSA
-void rsaDecrypt(uint32_t p[], uint32_t d, uint32_t len)
+void rsaDecrypt(char p[], uint32_t len, uint32_t d, uint32_t n)
 {
 	for(size_t i = 0; i < len; i++)
 		p[i] = powMod(p[i], d, n);
