@@ -111,7 +111,6 @@ mem_get_ok:
 
 [BITS 32]
 ;以32位元指令的格式組譯指令
-extern pow
 
 p_mode_start:
 ;初始化段暫存器
@@ -139,11 +138,17 @@ p_mode_start:
     call read_disk
 
 ; Testing for calling C func
-; push 3
-; push 2
-; call pow
-; l:
-;     jmp l
+; extern rsaDecrypt
+; lea eax, [testForRSA]
+
+; push 1
+; push eax
+; call rsaDecrypt
+; add esp, 8
+
+; mov eax, 4294967293
+
+; hlt
 
 ;calculate md5
     push dword [KERNEL_CHECKSUM_BASE_ADDR]
@@ -363,5 +368,8 @@ kernel_bad_msg:
     db 'Your kernel is bad!', 0x00
 
 kernel_checksum times 16 db 0
+
+testForRSA:
+    dd 0x78, 0x56, 0x34, 0x12
 
 %include "rewolf_md5.inc"

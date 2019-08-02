@@ -21,9 +21,9 @@ $(BUILD_DIR)/loader.bin: loader.S
 	@echo "\033[0;33mBuilding loader...\033[0m"
 	nasm -I include/ -f elf32 -o $(BUILD_DIR)/loader.elf loader.S
 
-	gcc $(CFLAGS) -c -o $(BUILD_DIR)/pow.o pow.c
+	gcc $(CFLAGS) -m32 -c -o $(BUILD_DIR)/rsa.o rsa.c
 
-	ld -Ttext 0x600 $(BUILD_DIR)/loader.elf -o $(BUILD_DIR)/loader.o $(BUILD_DIR)/pow.o
+	ld -m elf_i386 -Ttext 0x600 $(BUILD_DIR)/loader.elf -o $(BUILD_DIR)/loader.o $(BUILD_DIR)/rsa.o
 	objcopy -O binary $(BUILD_DIR)/loader.o $(BUILD_DIR)/loader.bin
 
 # Build kernel
