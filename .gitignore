@@ -1,3 +1,4 @@
 build/
 hd60M.img*
 bochsout.txt
+__pycache__/

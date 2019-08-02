@@ -15,14 +15,17 @@ uint32_t powMod(uint32_t b, uint32_t e, uint32_t m)
     return acc;
 }
 
+#define dec(x, d, n) powMod((x), d, n)
+
 // small key for testing
 // int n = 899;
 // int e = 37;
 // int d = 613;
 
-// 32-bit RSA
-void rsaDecrypt(char p[], uint32_t len, uint32_t d, uint32_t n)
+// 64 bytes -> 16 bytes
+// cipher   -> md5
+void cipherToMD5(uint32_t cipher[], char md5[], uint32_t d, uint32_t n)
 {
-	for(size_t i = 0; i < len; i++)
-		p[i] = powMod(p[i], d, n);
+    for(int i = 0; i < 16; i++)
+        md5[i] = dec(cipher[i], d, n);
 }

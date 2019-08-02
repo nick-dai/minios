@@ -137,33 +137,24 @@ p_mode_start:
 
     call read_disk
 
-; Testing for calling C func
-    extern rsaDecrypt
+; calculate md5 of the current loading kernel
+    push dword [KERNEL_CHECKSUM_BASE_ADDR]   ; size of kernel
+    push KERNEL_BASE_ADDR                    ; start address of kernel
+    push kernel_checksum                     ; dest : 16
+    call _rwf_md5                            ; ref: `rewolf_md5.inc`
 
-    ; lea eax, [testForRSA]
-    ; mov edi, eax
+; decrypt the cert for orig md5
+    extern cipherToMD5                       ; ref: `rsa.c`
+    ;
+    push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64+4] ; n
+    push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64]   ; d
+    push kernel_checksum_dec                      ; md5[]
+    push KERNEL_CHECKSUM_BASE_ADDR+4              ; cipher[]
+    call cipherToMD5
+    add esp, 0x10
 
-    ; push 0xfffffffd
-    ; push 0x13b0aca5
-    ; push 1
-    ; push eax
-    ; call rsaDecrypt
-    ; add esp, 16
-
-    ; hlt
-
-    ; 0x88 f9 e0 19
-    ; testForRSA db 0x19, 0xe0, 0xf9, 0x88
-    ; aa db 0x12, 0x34, 0x56, 0x78
-
-;calculate md5
-    push dword [KERNEL_CHECKSUM_BASE_ADDR]
-    push KERNEL_BASE_ADDR
-    push kernel_checksum
-    call _rwf_md5
-
-    mov edi, KERNEL_CHECKSUM_BASE_ADDR+4
-    mov esi, kernel_checksum
+    mov edi, kernel_checksum_dec
+    mov esi, kernel_checksum               ; current kernel hash
     mov ecx, 16
 
 check_kernel_checksum:
@@ -373,6 +364,9 @@ kernel_good_msg:
 kernel_bad_msg:
     db 'Your kernel is bad!', 0x00
 
+; md5 of the kernel which wanted to load
 kernel_checksum times 16 db 0
+
+kernel_checksum_dec times 16 db 0
 
 %include "rewolf_md5.inc"
