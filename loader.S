@@ -157,7 +157,7 @@ p_mode_start:
     mov esi, kernel_checksum               ; current kernel hash
     mov ecx, 16
 
-; check whether the md5 
+; check whether the md5
     check_kernel_checksum:
         lodsb
         cmp al, byte [edi]
@@ -165,7 +165,7 @@ p_mode_start:
         inc edi
         dec ecx
         test ecx, ecx
-        jz orig_code
+        jz orig_code  ; pass
         jmp check_kernel_checksum
 
     kernel_checksum_error:
@@ -176,18 +176,17 @@ p_mode_start:
 ; print a string
 ; put the addr of string in esi
 print_string:
-    mov ah, 0x0F
-    mov ebx, 0xb8000
+        mov ah, 0x0F
+        mov ebx, 0xb8000
     repeat_lod:
-    lodsb
-    or al, al
-    je done
-    mov [ebx], ax
-    add ebx, 2
-    jmp repeat_lod
+        lodsb
+        or al, al
+        je done
+        mov [ebx], ax
+        add ebx, 2
+        jmp repeat_lod
     done:
         ret
-
 
 ;--------啟用分頁機制--------
 ;1. 設定好 Page Directory，Page Table
@@ -363,7 +362,7 @@ kernel_good_msg:
     db 'Your kernel seems very well!', 0x00
 
 kernel_bad_msg:
-    db 'Your kernel is bad!', 0x00
+    db 'Unsigned kernel is not allowed...', 0x00
 
 ; md5 of the kernel which wanted to load
 kernel_checksum times 16 db 0

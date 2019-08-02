@@ -2,3 +2,4 @@ build/
 hd60M.img*
 bochsout.txt
 __pycache__/
+bx_enh_dbg.ini

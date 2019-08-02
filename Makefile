@@ -3,12 +3,20 @@ LIB=-I include/
 CFLAGS=-fno-builtin -fno-stack-protector -O2
 
 .PHONY: clean dump
-all:img dump
+all:compile sign image dump
+evil: compile image dump
 
-img: $(BUILD_DIR)/mbr.bin $(BUILD_DIR)/loader.bin $(BUILD_DIR)/kernel.bin
+compile: $(BUILD_DIR)/mbr.bin $(BUILD_DIR)/loader.bin $(BUILD_DIR)/kernel.bin
+
+image:
+	@echo "\033[0;33mMaking the image...\033[0m"
 	dd if=$(BUILD_DIR)/mbr.bin of=hd60M.img count=1 bs=512 conv=notrunc
 	dd if=$(BUILD_DIR)/loader.bin of=hd60M.img bs=512 count=8 seek=1 conv=notrunc
 	dd if=$(BUILD_DIR)/kernel.bin of=hd60M.img bs=512 count=200 seek=10 conv=notrunc
+
+sign:
+	@echo "\033[0;33mSigning kernel...\033[0m"
+	python3 hash_bin.py
 	dd if=$(BUILD_DIR)/kernel_hash.bin of=hd60M.img bs=512 count=1 seek=210 conv=notrunc
 
 # Build mbr
@@ -33,9 +41,9 @@ $(BUILD_DIR)/kernel.bin: kernel/main.c lib/print.S
 	gcc  -I lib/ -m32 -c -o $(BUILD_DIR)/main.o kernel/main.c
 	ld -m elf_i386  $(BUILD_DIR)/main.o $(BUILD_DIR)/print.o -Ttext 0xc0001000 -o $(BUILD_DIR)/main.bin
 	objcopy -O binary $(BUILD_DIR)/main.bin $(BUILD_DIR)/kernel.bin
-	python3 hash_bin.py
 
 dump:
+	@echo "\033[0;33mDump for debugging...\033[0m"
 	objdump -D -b binary -m i386 -M intel $(BUILD_DIR)/loader.bin > $(BUILD_DIR)/loader.bin.dump
 	objdump -D -b binary -m i386 -M intel $(BUILD_DIR)/kernel.bin > $(BUILD_DIR)/kernel.bin.dump
 	objdump -D -b binary -m i386 -M intel $(BUILD_DIR)/rsa.o > $(BUILD_DIR)/rsa.o.dump
