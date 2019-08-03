@@ -1,5 +1,7 @@
 %include "boot.inc"
 
+%include "rsaKey.inc"
+
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
 
 ;--------GDT 相關常數--------
@@ -146,8 +148,10 @@ p_mode_start:
 ; decrypt the cert for orig md5
     extern cipherToMD5                       ; ref: `rsa.c`
     ;
-    push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64+4] ; n
-    push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64]   ; d
+    ; push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64+4] ; n
+    ; push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64]   ; d
+    push KERNEL_KEY_N
+    push KERNEL_KEY_D
     push kernel_checksum_dec                      ; md5[]
     push KERNEL_CHECKSUM_BASE_ADDR+4              ; cipher[]
     call cipherToMD5

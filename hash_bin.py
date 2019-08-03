@@ -34,4 +34,9 @@ with open(kernel_hash, 'wb') as f:
     # for i in range(4):
     #     f.write(struct.pack('>I', int(md5[8*i:8*i+8], 16)))
 
+# with open('key.inc', 'w') as f:
+# 	# Add description
+# 	f.write('KERNEL_SIGN_D equ {}'.format(rsa.d))
+# 	f.write('KERNEL_SIGN_N equ {}'.format(rsa.n))
+
 print('Code signed')

@@ -1,0 +1,2 @@
+KERNEL_KEY_D equ 613
+KERNEL_KEY_N equ 899
