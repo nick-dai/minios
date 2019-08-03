@@ -25,3 +25,7 @@ def md5_RSA(md5):
 	    s += tmp
 	    l.append(int(tmp, 16))
 	return s, l
+
+# TODO: Actually gen the key
+def genKey():
+	return d, n

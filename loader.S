@@ -148,12 +148,10 @@ p_mode_start:
 ; decrypt the cert for orig md5
     extern cipherToMD5                       ; ref: `rsa.c`
     ;
-    ; push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64+4] ; n
-    ; push dword [KERNEL_CHECKSUM_BASE_ADDR+4+64]   ; d
-    push KERNEL_KEY_N
-    push KERNEL_KEY_D
-    push kernel_checksum_dec                      ; md5[]
-    push KERNEL_CHECKSUM_BASE_ADDR+4              ; cipher[]
+    push KERNEL_KEY_N                        ; n
+    push KERNEL_KEY_D                        ; d
+    push kernel_checksum_dec                 ; md5[]
+    push KERNEL_CHECKSUM_BASE_ADDR+4         ; cipher[]
     call cipherToMD5
     add esp, 0x10
 
@@ -366,7 +364,7 @@ kernel_good_msg:
     db 'Your kernel seems very well!', 0x00
 
 kernel_bad_msg:
-    db 'Unsigned kernel is not allowed...', 0x00
+    db 'Invalid kernel is not allowed...', 0x00
 
 ; md5 of the kernel which wanted to load
 kernel_checksum times 16 db 0

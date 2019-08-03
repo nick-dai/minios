@@ -3,7 +3,7 @@ LIB=-I include/
 CFLAGS=-fno-builtin -fno-stack-protector -O2
 
 .PHONY: clean dump
-all:compile sign image dump
+all: genkey compile sign image dump
 evil: compile image dump
 
 compile: $(BUILD_DIR)/mbr.bin $(BUILD_DIR)/loader.bin $(BUILD_DIR)/kernel.bin
@@ -18,6 +18,10 @@ sign:
 	@echo "\033[0;33mSigning kernel...\033[0m"
 	python3 hash_bin.py
 	dd if=$(BUILD_DIR)/kernel_hash.bin of=hd60M.img bs=512 count=1 seek=210 conv=notrunc
+
+genkey:
+	@echo "\033[0;33mGenerate keys...\033[0m"
+	python3 genKey.py
 
 # Build mbr
 $(BUILD_DIR)/mbr.bin: mbr.S
