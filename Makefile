@@ -2,9 +2,9 @@ BUILD_DIR=./build
 LIB=-I include/
 CFLAGS=-fno-builtin -fno-stack-protector -O2
 
-.PHONY: clean dump
+.PHONY: clean dump genkey
 all: genkey compile sign image dump
-evil: compile image dump
+evil: genkey compile image dump
 
 compile: $(BUILD_DIR)/mbr.bin $(BUILD_DIR)/loader.bin $(BUILD_DIR)/kernel.bin
 
